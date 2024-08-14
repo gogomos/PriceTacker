@@ -35,13 +35,23 @@ export async function scrapeAndStoreProduct(url: string) {
     }
 }
 
-export async function getProducts(productId: string) {
+export async function getProduct(productId: string) {
     try {
         connectToDB();
         const product = await Product.findOne({ _id: productId});
         if (!product) return null;
 
         return product;
+    } catch (error: any) {
+        throw new Error(`Failed to get products: ${error.message}`);
+    }
+}
+
+export async function getAllProducts () {
+    try {
+        connectToDB();
+        const products = await Product.find();
+        return products;
     } catch (error: any) {
         throw new Error(`Failed to get products: ${error.message}`);
     }
