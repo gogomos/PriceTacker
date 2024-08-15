@@ -35,7 +35,7 @@ export async function scrapeAndStoreProduct(url: string) {
     }
 }
 
-export async function getProduct(productId: string) {
+export async function getProductById(productId: string) {
     try {
         connectToDB();
         const product = await Product.findOne({ _id: productId});
