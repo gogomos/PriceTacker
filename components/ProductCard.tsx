@@ -6,7 +6,7 @@ import Image from 'next/image'
 interface Props {
   product: Product;
 }   
-const ProuductCard = ({ product } : Props) => {
+const ProductCard = ({ product } : Props) => {
   return (
     <Link className='product-card' href={`/products/${product._id}`}>
         <div className="product-card_img-container">
@@ -33,4 +33,4 @@ const ProuductCard = ({ product } : Props) => {
   )
 }
 
-export default ProuductCard
+export default ProductCard
