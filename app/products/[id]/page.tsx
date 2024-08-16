@@ -1,4 +1,4 @@
-// import Modal from "@/components/Modal";
+import Modal from "@/components/Modal";
 import PriceInfoCard from "@/components/PriceInfoCard";
 // import ProductCard from "@/components/ProductCard";
 import ProductCard from "@/components/ProductCard"
@@ -20,6 +20,7 @@ const ProductDetails = async ({ params: { id } }: Props) => {
   if(!product) redirect('/')
 
   const similarProducts = await getSimilarProducts(id);
+  // console.log(similarProducts);
 
   return (
     <div className="product-container">
@@ -153,7 +154,7 @@ const ProductDetails = async ({ params: { id } }: Props) => {
             </div>
           </div>
 
-          {/* <Modal productId={id} /> */}
+          { <Modal productId={id} /> }
         </div>
       </div>
 

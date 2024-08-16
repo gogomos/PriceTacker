@@ -78,19 +78,17 @@ export async function generateEmailBody(
 }
 
 const transporter = nodemailer.createTransport({
-  host: "smtp.zoho.com",
-  port: 465,
-  secure: true, // Use true for port 465, false for other ports
+  service: 'gmail',
   auth: {
-    user: "aprenant2@talents4starups.com",
-    pass: "jBmm!mx8",
+    user: 'oussamaaboudan1995@gmail.com',
+    pass: 'ftexxabhvzgtfkez', // Consider using an app password for security
   },
   maxConnections: 1
 });
 
 export const sendEmail = async (emailContent: EmailContent, sendTo: string[]) => {
   const mailOptions = {
-    from: 'aprenant2@talents4starups.com',
+    from: 'oussamaaboudan1995@gmail.com',
     to: sendTo,
     html: emailContent.body,
     subject: emailContent.subject,
