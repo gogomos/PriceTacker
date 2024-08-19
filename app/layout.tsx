@@ -22,7 +22,6 @@ export default function RootLayout({
           <NavBar />
           {children}
         </main>
-
       </body>
     </html>
   );
