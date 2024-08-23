@@ -7,6 +7,11 @@ import { scrapeAmazonProduct } from "../scraper";
 import { getAveragePrice, getHighestPrice, getLowestPrice } from "../utils";
 import { User } from "@/types";
 import { generateEmailBody, sendEmail } from "../nodemailer";
+import * as z from "zod";
+import { LoginSchema } from '@/lib/models/user';
+import { RegisterSchema } from '@/lib/models/user';
+import { UserB } from '../models/User.model';
+import bcrypt from 'bcrypt';
 
 export async function scrapeAndStoreProduct(productUrl: string) {
   if(!productUrl) return;
@@ -114,3 +119,76 @@ export async function addUserEmailToProduct(productId: string, userEmail: string
     console.log(error);
   }
 }
+
+export const login = async (values: z.infer<typeof LoginSchema>) => {
+  const validatedFields = LoginSchema.safeParse(values);
+
+  if (!validatedFields.success) {
+    return { error: "Invalid fields" };
+  }
+
+  const { email, password } = values;
+
+  try {
+    await connectToDB();
+    // Find user by email
+    const user = await UserB.findOne({ email }).exec();
+
+    if (!user) {
+      return { error: "User not found" };
+    }
+
+    // Compare password (assuming hashed passwords)
+    const isMatch = bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return { error: "Invalid password" };
+    }
+
+    // Successful login
+    return { success: "Login successful" };
+
+  } catch (error) {
+    console.error(error);
+    return { error: "An error occurred during login" };
+  }
+};
+
+
+
+export const register = async (values: z.infer<typeof RegisterSchema>) => {
+  const validatedFields = RegisterSchema.safeParse(values);
+
+  if (!validatedFields.success) {
+    return { error: "Invalid fields" };
+  }
+
+  const { email, password, name } = values;
+
+  try {
+    await connectToDB();
+    // Check if user already exists
+    const existingUser = await UserB.findOne({ email }).exec();
+    if (existingUser) {
+      return { error: "User already exists" };
+    }
+
+    // Hash the password
+    const hashedPassword = await bcrypt.hash(password, 12);
+
+    // Create a new user
+    const newUser = new UserB({
+      name,
+      email,
+      password: hashedPassword
+    });
+
+    await newUser.save();
+
+    // Successful registration
+    return { success: "Registration successful" };
+
+  } catch (error) {
+    console.error(error);
+    return { error: "An error occurred during registration" };
+  }
+};
