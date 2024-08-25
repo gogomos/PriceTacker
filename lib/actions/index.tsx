@@ -8,11 +8,13 @@ import { getAveragePrice, getHighestPrice, getLowestPrice } from "../utils";
 import { User } from "@/types";
 import { generateEmailBody, sendEmail } from "../nodemailer";
 import * as z from "zod";
-import { LoginSchema } from '@/lib/models/user';
-import { RegisterSchema } from '@/lib/models/user';
-import { UserB } from '../models/User.model';
-import bcrypt from 'bcrypt';
-
+import { LoginSchema } from '@/lib/models/schema';
+import { RegisterSchema } from '@/lib/models/schema';
+import UserModel  from '../models/User.model';
+import bcrypt from 'bcryptjs';
+import { signIn } from "@/auth";
+import { DEFAULT_LOGIN_REDIRECT } from "@/routes";
+import { AuthError } from "next-auth";
 export async function scrapeAndStoreProduct(productUrl: string) {
   if(!productUrl) return;
 
@@ -130,27 +132,23 @@ export const login = async (values: z.infer<typeof LoginSchema>) => {
   const { email, password } = values;
 
   try {
-    await connectToDB();
-    // Find user by email
-    const user = await UserB.findOne({ email }).exec();
-
-    if (!user) {
-      return { error: "User not found" };
-    }
-
-    // Compare password (assuming hashed passwords)
-    const isMatch = bcrypt.compare(password, user.password);
-    if (!isMatch) {
-      return { error: "Invalid password" };
-    }
-
-    // Successful login
-    return { success: "Login successful" };
+    await signIn("credentials" , {
+      email,
+      password,
+      redirectTo: DEFAULT_LOGIN_REDIRECT,
+    })
 
   } catch (error) {
-    console.error(error);
-    return { error: "An error occurred during login" };
+   if (error instanceof AuthError) {
+     switch (error.type) {
+      case "CredentialsSignin": 
+        return { error: "Invalid credentials" };
+      default:
+        return { error: "An error occurred during login" };
+     }
   }
+  throw error;
+}
 };
 
 
@@ -167,7 +165,7 @@ export const register = async (values: z.infer<typeof RegisterSchema>) => {
   try {
     await connectToDB();
     // Check if user already exists
-    const existingUser = await UserB.findOne({ email }).exec();
+    const existingUser = await UserModel.findOne({ email }).exec();
     if (existingUser) {
       return { error: "User already exists" };
     }
@@ -176,7 +174,7 @@ export const register = async (values: z.infer<typeof RegisterSchema>) => {
     const hashedPassword = await bcrypt.hash(password, 12);
 
     // Create a new user
-    const newUser = new UserB({
+    const newUser = new UserModel({
       name,
       email,
       password: hashedPassword

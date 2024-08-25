@@ -13,7 +13,7 @@ import {
   FormLabel,
   FormMessage
 } from "@/components/ui/form";
-import { RegisterSchema } from '@/lib/models/user'; // Updated schema import
+import { RegisterSchema } from '@/lib/models/schema'; // Updated schema import
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { FormError } from '@/components/form-error';

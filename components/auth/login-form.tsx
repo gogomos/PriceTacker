@@ -13,7 +13,7 @@ import {
   FormLabel,
   FormMessage
 } from "@/components/ui/form"
-import { LoginSchema } from '@/lib/models/user';
+import { LoginSchema } from '@/lib/models/schema';
 import { Input } from '@/components/ui/input';
 import {Button} from '@/components/ui/button' ;
 import { FormError} from '@/components/form-error'
