@@ -1,7 +1,7 @@
 // auth.config.ts
 import type { NextAuthConfig } from 'next-auth';
 import Credentials from 'next-auth/providers/credentials';
-import UserModel from './lib/models/User.model'; // Ensure UserModel is correctly imported
+import User from './lib/models/User.model'; // Ensure User is correctly imported
 import { LoginSchema } from './lib/models/schema';
 import bcrypt from 'bcryptjs';
 
@@ -18,7 +18,7 @@ const credentialsProvider = Credentials({
     if (validatedFields.success) {
       const { email, password } = validatedFields.data;
       // Find the user by email
-      const user = await UserModel.findOne({ email }).exec();
+      const user = await User.findOne({ email }).exec();
       if (!user || !user.password) {
         return null;
       }

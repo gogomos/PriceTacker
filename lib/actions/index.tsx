@@ -5,12 +5,12 @@ import Product from "../models/product.model";
 import { connectToDB } from "../mongoose";
 import { scrapeAmazonProduct } from "../scraper";
 import { getAveragePrice, getHighestPrice, getLowestPrice } from "../utils";
-import { User } from "@/types";
+import { UserE } from "@/types";
 import { generateEmailBody, sendEmail } from "../nodemailer";
 import * as z from "zod";
 import { LoginSchema } from '@/lib/models/schema';
 import { RegisterSchema } from '@/lib/models/schema';
-import UserModel  from '../models/User.model';
+import User  from '../models/User.model';
 import bcrypt from 'bcryptjs';
 import { signIn } from "@/auth";
 import { DEFAULT_LOGIN_REDIRECT } from "@/routes";
@@ -106,7 +106,7 @@ export async function addUserEmailToProduct(productId: string, userEmail: string
 
     if(!product) return;
 
-    const userExists = product.users.some((user: User) => user.email === userEmail);
+    const userExists = product.users.some((user: UserE) => user.email === userEmail);
 
     if(!userExists) {
       product.users.push({ email: userEmail });
@@ -165,7 +165,7 @@ export const register = async (values: z.infer<typeof RegisterSchema>) => {
   try {
     await connectToDB();
     // Check if user already exists
-    const existingUser = await UserModel.findOne({ email }).exec();
+    const existingUser = await User.findOne({ email }).exec();
     if (existingUser) {
       return { error: "User already exists" };
     }
@@ -174,7 +174,7 @@ export const register = async (values: z.infer<typeof RegisterSchema>) => {
     const hashedPassword = await bcrypt.hash(password, 12);
 
     // Create a new user
-    const newUser = new UserModel({
+    const newUser = new User({
       name,
       email,
       password: hashedPassword
