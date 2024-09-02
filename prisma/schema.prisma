@@ -1,0 +1,79 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("MONGODB_URI")
+}
+
+model Product {
+  id            String     @id @default(auto()) @map("_id") @db.ObjectId
+  url           String     @unique
+  currency      String
+  image         String
+  title         String
+  stars         Int?
+  date          DateTime
+  currentPrice  Float
+  originalPrice Float
+  priceHistory  PriceHistory[]
+  lowestPrice   Float?
+  highestPrice  Float?
+  averagePrice  Float?
+  discountRate  Float?
+  description   String?
+  category      String?
+  reviewsCount  Int?
+  isOutOfStock  Boolean    @default(false)
+  users         UserProduct[]
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+}
+
+model PriceHistory {
+  id       String   @id @default(auto()) @map("_id") @db.ObjectId
+  price    Float
+  date     DateTime @default(now())
+  product  Product  @relation(fields: [productId], references: [id])
+  productId String  @db.ObjectId
+}
+
+model User {
+  id            String     @id @default(auto()) @map("_id") @db.ObjectId
+  name          String?
+  email         String     @unique
+  emailVerified DateTime?
+  image         String?
+  accounts      Account[]
+  password      String
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+}
+
+model Account {
+  id                 String    @id @default(auto()) @map("_id") @db.ObjectId
+  userId             String    @db.ObjectId
+  user               User      @relation(fields: [userId], references: [id])
+  type               String
+  provider           String
+  providerAccountId  String
+  refresh_token      String?
+  access_token       String?
+  expires_at         Int?
+  token_type         String?
+  scope              String?
+  id_token           String?
+  session_state      String?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  @@index([provider, providerAccountId], name: "provider_providerAccountId_unique")
+}
+
+model UserProduct {
+  id       String   @id @default(auto()) @map("_id") @db.ObjectId
+  email    String
+  product  Product  @relation(fields: [productId], references: [id])
+  productId String  @db.ObjectId
+}

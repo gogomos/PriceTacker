@@ -5,9 +5,11 @@ const SettingsPage = async () => {
     const session = await auth()
   return (
     <div>
-      {JSON.stringfy(session)}
+      {JSON.stringify(session)}
     </div>
   )
 }
 
 export default SettingsPage
+
+
