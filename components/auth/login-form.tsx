@@ -34,14 +34,26 @@ export const LoginForm = () => {
   const onSubmit = (values: z.infer<typeof LoginSchema>) => {
     setError("");
     setSuccess("");
-    startTransition(() => {
-      login(values)
-        .then((data) => {
-          setError(data.error);
-          setSuccess(data.success);
-        })
-    })
-  }
+    startTransition(async () => {
+      try {
+        const data = await login(values);
+        console.log("Login result:", data); // Add this line to debug
+  
+        if (data.success) {
+          setSuccess("Login successful");
+          setError("");
+          // Optionally redirect or handle successful login
+        } else {
+          setSuccess("");
+          setError(data.error || "Unexpected error occurred");
+        }
+      } catch (error) {
+        setSuccess("");
+        setError("An unexpected error occurred");
+        console.error("Login error:", error);
+      }
+    });
+  };
   return (
     <CardWrapper
         headerLabel='Welcom Back'

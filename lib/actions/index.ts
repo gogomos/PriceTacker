@@ -10,10 +10,11 @@ import * as z from "zod";
 import { LoginSchema } from '@/lib/models/schema';
 import { RegisterSchema } from '@/lib/models/schema';
 import bcrypt from 'bcryptjs';
-// import { signIn } from "@/auth";
-import { signIn } from 'next-auth/react';
+import { signIn } from "@/auth";
+// import { signIn } from 'next-auth/react';
 import { DEFAULT_LOGIN_REDIRECT } from "@/routes";
 import { prisma } from "../prisma";
+import { AuthError } from "next-auth";
 // const prisma = new PrismaClient();
 
 // import { AuthError }  from "next-auth";
@@ -98,6 +99,20 @@ export async function getAllProducts() {
   }
 }
 
+export async function getProductById(id: string) {
+  console.log("ppppppppppppppppppppppppppppp" + id);
+  try {
+    const product = await prisma.product.findUnique({
+      where: {
+        id: id, // Assuming 'id' is the unique identifier for the product
+      },
+    });
+    return product;
+  } catch (error) {
+    console.error("Error fetching product by ID:", error);
+    throw new Error("Unable to fetch product"); // Optionally, throw a more user-friendly error
+  }
+}
 
 export async function getSimilarProducts(productId: string) {
   try {
@@ -148,43 +163,44 @@ export async function addUserEmailToProduct(productId: string, userEmail: string
   }
 }
 
+// const defaultResponse = { success: false, error: "Unknown error occurred" };
 
 export const login = async (values: z.infer<typeof LoginSchema>) => {
   const validatedFields = LoginSchema.safeParse(values);
 
   if (!validatedFields.success) {
-    return { error: "Invalid fields" };
+    return { success: false, error: "Invalid fields" };
   }
 
   const { email, password } = validatedFields.data;
 
   try {
-    // Check if the code is running on the client side
-    if (typeof window !== "undefined") {
-      const result = await signIn("credentials", {
-        email,
-        password,
-        redirect: false, // Handle the response manually
-      });
+    const result = await signIn("credentials", {
+      email,
+      password,
+      redirect: false,
+    });
 
-      if (result?.error) {
-        // Handle specific error messages
-        if (result.error.includes("CredentialsSignin")) {
-          return { error: "Invalid credentials" };
-        }
-        return { error: "An error occurred during login: " + result.error };
-      }
-
-      // If no errors and result.status is 'success'
-      return { success: "Login successful" };
-    } else {
-      // Handle the case where the function is accidentally called server-side
-      return { error: "This function should only be called in a browser context." };
+    if (result?.error) {
+      throw new AuthError("CredentialsSignin", result.error);
     }
 
+    if (result?.ok) {
+      return { success: true, error: null };
+    }
+
+    return { success: false, error: "Unexpected error occurred" };
   } catch (error) {
-    console.error("Login error:", error); // Log the error for debugging
-    return { error: "An unexpected error occurred" };
+    if (error instanceof AuthError) {
+      switch (error.type) {
+        case "CredentialsSignin":
+          return { success: false, error: "Invalid credentials" };
+        default:
+          return { success: false, error: "Authentication failed" };
+      }
+    }
+
+    return { success: false, error: "Something went wrong" };
   }
 };
 
