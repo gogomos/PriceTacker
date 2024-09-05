@@ -32,17 +32,18 @@ model Product {
 }
 
 model PriceHistory {
-  id       String   @id @default(auto()) @map("_id") @db.ObjectId
-  price    Float
-  date     DateTime @default(now())
-  product  Product  @relation(fields: [productId], references: [id])
-  productId String  @db.ObjectId
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  price      Float
+  date       DateTime @default(now())
+  product    Product  @relation(fields: [productId], references: [id])
+  productId  String   @db.ObjectId
 }
 
 enum UserRole {
   NORMAL
   PRIEMIEM
 }
+
 model User {
   id            String     @id @default(auto()) @map("_id") @db.ObjectId
   name          String?
@@ -51,14 +52,14 @@ model User {
   image         String?
   accounts      Account[]
   password      String?
-  role          UserRole @default(NORMAL)
+  role          UserRole   @default(NORMAL)
   createdAt     DateTime   @default(now())
   updatedAt     DateTime   @updatedAt
 }
 
 model Account {
-  id                 String    @id @default(auto()) @map("_id") @db.ObjectId
-  userId             String    @db.ObjectId
+  id                 String     @id @default(auto()) @map("_id") @db.ObjectId
+  userId             String     @db.ObjectId
   user               User      @relation(fields: [userId], references: [id])
   type               String
   provider           String
@@ -73,12 +74,12 @@ model Account {
   createdAt          DateTime  @default(now())
   updatedAt          DateTime  @updatedAt
 
-  @@index([provider, providerAccountId], name: "provider_providerAccountId_unique")
+  @@unique([provider, providerAccountId], name: "provider_providerAccountId_unique")
 }
 
 model UserProduct {
-  id       String   @id @default(auto()) @map("_id") @db.ObjectId
-  email    String
-  product  Product  @relation(fields: [productId], references: [id])
-  productId String  @db.ObjectId
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  email      String
+  product    Product  @relation(fields: [productId], references: [id])
+  productId  String   @db.ObjectId
 }
